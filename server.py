@@ -17,13 +17,14 @@ For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python
 def choose_move(curr, next):
   if next[0] != curr[0]:
     x_diff = next[0] - curr[0]
-    if x_diff == 1:
+    if x_diff > 0:
       return "right"
     else:
       return "left" 
-  else:
+
+  if next[1] != curr[1]:
     y_diff = next[1] - curr[1]
-    if y_diff == 1:
+    if y_diff > 0:
       return "up"
     else:
       return "down"
@@ -56,34 +57,14 @@ class Battlesnake(object):
         # cherrypy.request.json contains information about the game that's about to be played.
         data = cherrypy.request.json
 
-        # width = data['board']['width']
-        # height = data['board']['height']
-
-        # grid = np.ones((height,width), dtype=np.int8)
-
-        # obstacles = self.obstacles()
-        # print(obstacles)
-
-        # food = self.get_closest_food()
-        # print(food)
-
-        # for elt in obstacles:
-        #   #(height-1)-
-        #   grid[(height-1)-elt[1], elt[0]] = 0
-
-        # print(grid)
-
         pprint(data)
         print("START")
         return "ok"
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    def get_closest_food(self):
-      data = cherrypy.request.json
-
-     
-      
+    def get_closest_food(self, data):
+         
       d=[]
       for food in data["board"]["food"]:
         youX = data["you"]["head"]["x"]
@@ -102,9 +83,7 @@ class Battlesnake(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    def obstacles(self):
-      data = cherrypy.request.json
-
+    def obstacles(self, data):
       height = data['board']['height']
       width = data['board']['width']
 
@@ -159,6 +138,7 @@ class Battlesnake(object):
           your_next_possible_coordinates.add(elt)
 
       obstacles = obstacles - your_next_possible_coordinates
+      obstacles = obstacles - set(your_head)
       return obstacles
 
 
@@ -175,26 +155,32 @@ class Battlesnake(object):
 
         grid = np.ones((height,width), dtype=np.int8)
 
-        obstacles = self.obstacles()
+        obstacles = self.obstacles(data)
         print(obstacles)
 
-        food = self.get_closest_food()
+        food = self.get_closest_food(data)
         print("food")
         head_x = data['you']['head']['x']
         head_y = data['you']['head']['y']
         head = (head_x, head_y)
         food = dict_to_list(food)
+        print(food)
+        print("head")
+        print(head)
 
         for elt in obstacles:
-          #(height-1)-
           # mark where are the obstacles
-          grid[(height-1)-elt[1], elt[0]] = 0
+          if list(elt) != list(head):
+            grid[elt[1], elt[0]] = 0
 
+        # FOR VISUAL PURPOSES ONLY
+        # CHANGING VALUE WILL CHANGE THE WEIGHT
         # mark where is the food
-        grid[(height-1)-food[1], food[0]] = 2
-
+        #grid[(height-1)-food[1], food[0]] = 2
+        # FOR VISUAL PURPOSES ONLY
+        # CHANGING VALUE WILL CHANGE THE WEIGHT
         #mark where is the head
-        grid[(height-1)-head[1], head[0]] = 5
+        #grid[(height-1)-head[1], head[0]] = 5
 
         print(data['turn'])
         print(grid)
@@ -206,28 +192,13 @@ class Battlesnake(object):
         end = grid.node(food[0], food[1])
         path, runs = finder.find_path(start, end, grid)
         next_coordinate = path[1]
+        print("path:")
+        print(path)
+        print(" next coordinate is :")
+        print(next_coordinate)
 
         #now we need to decide what move will take the snake to the next coordinate
         move = choose_move(head, next_coordinate)
-        #pprint(data)
-
-        # Choose a random direction to move in
-        # possible_moves = ["up", "down", "left", "right"]
-        # move = "left"
-
-        # if (data["you"]["head"]["x"] == 0):
-        #   move = "up"
-        #   if (data["you"]["head"]["y"]==0):
-        #     return {"move": move}
-
-        # if(data["you"]["head"]["y"] == data["board"]["height"]-1):
-        #   move = "right"
-
-        # if(data["you"]["head"]["x"] == data["board"]["width"]-1):
-        #   move = "down"
-        
-        # if(data["you"]["head"]["y"] == 0):
-        #   move = "left"
 
         print(f"MOVE: {move}")
         return {"move": move}
