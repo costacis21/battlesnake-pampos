@@ -10,6 +10,10 @@ For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python
 """
 
 
+def dict_to_list(dict):
+      # example: dict = {'x' : 3, 'y' : 5}
+      return (dict['x'], dict['y'])
+
 class Battlesnake(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -60,48 +64,80 @@ class Battlesnake(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    def get_snake_obstacles(self):
+    def obstacles(self):
       data = cherrypy.request.json
 
-      obstacles = []
+      height = data['board']['height']
+      width = data['board']['width']
 
-      for snake in data["board"]["snakes"]:
-        for part in snake["body"]:
-          obstacles.append(part)
-        head_x = snake["head"]["x"]
-        head_y = snake["head"]["y"]
-        obstacles.append({"x": head_x+1, "y": head_y})
-        if(head_y-1>0):
-          obstacles.append({"x": head_x, "y": head_y-1})
-        if(head_x-1>0):
-          obstacles.append({"x": head_x-1, "y": head_y})
-        obstacles.append({"x": head_x, "y": head_y+1})
+      obstacles = list()
 
+      snakes = data["board"]["snakes"]
 
-# remove possible duplicates
-      seen = set()
-      new_l = []
-      for d in obstacles:
-        t = tuple(d.items())
-        if t not in seen:
-          seen.add(t)
-          new_l.append(d)
-        else:
-          print("DUPLICATE MALAKA")
-          print(t)
-      obstacles = new_l.copy()
+      for snake in snakes:
+        for part in snake['body']:
+          if dict_to_list(part) not in obstacles:
+            obstacles.append(dict_to_list(part))
+        head = dict_to_list(snake['head'])
 
+        if head[0] + 1 <= width:
+          obstacles.append((head[0]+1, head[1]))
 
+        if head[0] - 1 >= 0:
+          obstacles.append((head[0]-1, head[1]))
 
-      print(obstacles)
+        if head[1] + 1 <= height:
+          obstacles.append((head[0], head[1]+1))
+
+        if head[1] - 1 >= 0:
+          obstacles.append((head[0], head[1]-1))
+
+      obstacles = list(set(obstacles)) # remove duplicates
+      return obstacles
+
+        
 
 
-      """
-      example, list of dicts
+#     @cherrypy.expose
+#     @cherrypy.tools.json_in()
+#     def get_snake_obstacles(self):
+#       data = cherrypy.request.json
 
-      [{'x': 1, 'y': 10}, {'x': 1, 'y': 9}, {'x': 1, 'y': 9}, ...]
+#       obstacles = []
 
-      """
+#       for snake in data["board"]["snakes"]:
+#         for part in snake["body"]:
+#           obstacles.append(part)
+#         head_x = snake["head"]["x"]
+#         head_y = snake["head"]["y"]
+#         obstacles.append({"x": head_x+1, "y": head_y})
+#         if(head_y-1>0):
+#           obstacles.append({"x": head_x, "y": head_y-1})
+#         if(head_x-1>0):
+#           obstacles.append({"x": head_x-1, "y": head_y})
+#         obstacles.append({"x": head_x, "y": head_y+1})
+
+# # remove possible duplicates
+#       seen = set()
+#       new_l = []
+#       for d in obstacles:
+#         t = tuple(d.items())
+#         if t not in seen:
+#           seen.add(t)
+#           new_l.append(d)
+#         else:
+#           print("DUPLICATE MALAKA")
+#           print(t)
+#       obstacles = new_l.copy()
+
+#       print(obstacles)
+
+#       """
+#       example, list of dicts
+
+#       [{'x': 1, 'y': 10}, {'x': 1, 'y': 9}, {'x': 1, 'y': 9}, ...]
+
+#       """
 
 
         
