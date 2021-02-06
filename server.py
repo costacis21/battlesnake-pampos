@@ -13,6 +13,11 @@ This is a simple Battlesnake server written in Python.
 For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python/README.md
 """
 
+def random_point(x,y):
+  x = random.randint(0,x-1)
+  y = random.randint(0,y-1)
+  return (x,y)
+
 # given current position and next, find which move will lead us there
 def choose_move(curr, next):
   if next[0] != curr[0]:
@@ -44,10 +49,10 @@ class Battlesnake(object):
         # TIP: If you open your Battlesnake URL in browser you should see this data
         return {
             "apiversion": "1",
-            "author": "",  # TODO: Your Battlesnake Username
-            "color": "#888888",  # TODO: Personalize
-            "head": "default",  # TODO: Personalize
-            "tail": "default",  # TODO: Personalize
+            "author": "alexangeli",  # TODO: Your Battlesnake Username
+            "color": "#ff3399",  # TODO: Personalize
+            "head": "earmuffs",  # TODO: Personalize
+            "tail": "mouse",  # TODO: Personalize
         }
 
     @cherrypy.expose
@@ -64,7 +69,7 @@ class Battlesnake(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def get_closest_food(self, data):
-         
+    #begin changes
       d=[]
       for food in data["board"]["food"]:
         youX = data["you"]["head"]["x"]
@@ -77,7 +82,6 @@ class Battlesnake(object):
 
       minIndex = d.index(min(d))
       
-
       print(minIndex)
       return data["board"]["food"][minIndex]
 
@@ -95,50 +99,23 @@ class Battlesnake(object):
         for part in snake['body']:
           if dict_to_list(part) not in obstacles:
             obstacles.append(dict_to_list(part))
-        head = dict_to_list(snake['head'])
+        if not (snake["id"]==data["you"]["id"]):
+          head = dict_to_list(snake['head'])
 
-        if head[0] + 1 <= width:
-          obstacles.append((head[0]+1, head[1]))
+          if head[0] + 1 < width:
+            obstacles.append((head[0]+1, head[1]))
 
-        if head[0] - 1 >= 0:
-          obstacles.append((head[0]-1, head[1]))
+          if head[0] - 1 >= 0:
+            obstacles.append((head[0]-1, head[1]))
 
-        if head[1] + 1 <= height:
-          obstacles.append((head[0], head[1]+1))
+          if head[1] + 1 < height:
+            obstacles.append((head[0], head[1]+1))
 
-        if head[1] - 1 >= 0:
-          obstacles.append((head[0], head[1]-1))
+          if head[1] - 1 >= 0:
+            obstacles.append((head[0], head[1]-1))
 
       obstacles = set(obstacles) # remove duplicates
 
-      your_head = dict_to_list(data['you']['head'])
-      your_body_list = data['you']['body']
-      your_body_coordinates = list()
-      your_next_coordinates = list()
-
-      for elt in your_body_list:
-        your_body_coordinates.append(dict_to_list(elt))
-
-      if your_head[0] + 1 <= width:
-          your_next_coordinates.append((your_head[0]+1, your_head[1]))
-
-      if your_head[0] - 1 >= 0:
-        your_next_coordinates.append((your_head[0]-1, your_head[1]))
-
-      if your_head[1] + 1 <= height:
-        your_next_coordinates.append((your_head[0], your_head[1]+1))
-
-      if your_head[1] - 1 >= 0:
-        your_next_coordinates.append((your_head[0], your_head[1]-1))
-
-      #remove your head's next available moves if that's its body
-      your_next_possible_coordinates = set()
-      for elt in your_next_coordinates:
-        if elt not in your_body_coordinates:
-          your_next_possible_coordinates.add(elt)
-
-      obstacles = obstacles - your_next_possible_coordinates
-      obstacles = obstacles - set(your_head)
       return obstacles
 
 
@@ -152,22 +129,26 @@ class Battlesnake(object):
         data = cherrypy.request.json
         width = data['board']['width']
         height = data['board']['height']
+        all_food = [dict_to_list(elt) for elt in data['board']['food']]
+        health = data['you']['health']
 
         grid = np.ones((height,width), dtype=np.int8)
 
         obstacles = self.obstacles(data)
         print(obstacles)
-
-        food = self.get_closest_food(data)
-        print("food")
+        if health < 40:
+          food = self.get_closest_food(data)
+          food = dict_to_list(food)
+        else:
+          while 1:
+            food = random_point(width,height)
+            if food not in obstacles and food not in all_food:
+              break
+        
         head_x = data['you']['head']['x']
         head_y = data['you']['head']['y']
         head = (head_x, head_y)
-        food = dict_to_list(food)
-        print(food)
-        print("head")
-        print(head)
-
+        
         for elt in obstacles:
           # mark where are the obstacles
           if list(elt) != list(head):
@@ -185,6 +166,8 @@ class Battlesnake(object):
         print(data['turn'])
         print(grid)
 
+        # if data["you"]["health"] <20:
+        
         #lets choose a move
         finder = AStarFinder(heuristic=manhattan)
         grid = Grid(matrix = grid)
