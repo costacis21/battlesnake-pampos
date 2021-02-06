@@ -116,37 +116,6 @@ class Battlesnake(object):
 
       obstacles = set(obstacles) # remove duplicates
 
-<<<<<<< HEAD
-=======
-      # your_head = dict_to_list(data['you']['head'])
-      # your_body_list = data['you']['body']
-      # your_body_coordinates = list()
-      # your_next_coordinates = list()
-
-      # for elt in your_body_list:
-      #   your_body_coordinates.append(dict_to_list(elt))
-
-      # if your_head[0] + 1 < width:
-      #     your_next_coordinates.append((your_head[0]+1, your_head[1]))
-
-      # if your_head[0] - 1 >= 0:
-      #   your_next_coordinates.append((your_head[0]-1, your_head[1]))
-
-      # if your_head[1] + 1 < height:
-      #   your_next_coordinates.append((your_head[0], your_head[1]+1))
-
-      # if your_head[1] - 1 >= 0:
-      #   your_next_coordinates.append((your_head[0], your_head[1]-1))
-
-      #remove your head's next available moves if that's its body
-      # your_next_possible_coordinates = set()
-      # for elt in your_next_coordinates:
-      #   if elt not in your_body_coordinates:
-      #     your_next_possible_coordinates.add(elt)
-
-      # obstacles = obstacles - your_next_possible_coordinates
-      # obstacles = obstacles - set(your_head)
->>>>>>> 849197f09fc43179cbb588c347b17504b19d830d
       return obstacles
 
 
@@ -166,15 +135,6 @@ class Battlesnake(object):
         grid = np.ones((height,width), dtype=np.int8)
 
         obstacles = self.obstacles(data)
-        print(obstacles)
-        if health < 40:
-          food = self.get_closest_food(data)
-          food = dict_to_list(food)
-        else:
-          while 1:
-            food = random_point(width,height)
-            if food not in obstacles and food not in all_food:
-              break
         
         head_x = data['you']['head']['x']
         head_y = data['you']['head']['y']
@@ -185,49 +145,42 @@ class Battlesnake(object):
           if list(elt) != list(head):
             grid[elt[1], elt[0]] = 0
 
-        # FOR VISUAL PURPOSES ONLY
-        # CHANGING VALUE WILL CHANGE THE WEIGHT
-        # mark where is the food
-        #grid[(height-1)-food[1], food[0]] = 2
-        # FOR VISUAL PURPOSES ONLY
-        # CHANGING VALUE WILL CHANGE THE WEIGHT
-        #mark where is the head
-        #grid[(height-1)-head[1], head[0]] = 5
-
-        print(data['turn'])
-        print(grid)
-
-        # if data["you"]["health"] <20:
-        
-        #lets choose a move
         finder = AStarFinder(heuristic=manhattan)
         grid = Grid(matrix = grid)
         start = grid.node(head[0], head[1])
+
+        if health < 60:
+          food = self.get_closest_food(data)
+          food = dict_to_list(food)
+        else:
+          while 1:
+            food = random_point(width,height)
+            if food not in obstacles and food not in all_food:
+              #good to go
+              end = grid.node(food[0], food[1])
+              path, runs = finder.find_path(start, end, grid)
+              if path:
+                next_coordinate = path[1]
+                move = choose_move(head, next_coordinate)
+                print(f"MOVE: {move}")
+                return {"move": move}
+              else:
+                continue
+
         end = grid.node(food[0], food[1])
         path, runs = finder.find_path(start, end, grid)
         next_coordinate = path[1]
-        print("path:")
-        print(path)
-        print(" next coordinate is :")
-        print(next_coordinate)
+        move = choose_move(head, next_coordinate)
+        print(f"MOVE: {move}")
+        return {"move": move}
+
+        
+
+        #lets choose a move
+        
 
         #now we need to decide what move will take the snake to the next coordinate
         move = choose_move(head, next_coordinate)
-        # else:
-        #   # move = "left"
-        #   if (data["you"]["head"]["x"] == 0):
-        #     move = "up"
-        #     if (data["you"]["head"]["y"]==0):
-        #       return {"move": move}
-
-        #   if(data["you"]["head"]["y"] == data["board"]["height"]-1):
-        #     move = "right"
-
-        #   if(data["you"]["head"]["x"] == data["board"]["width"]-1):
-        #     move = "down"
-
-        #   if(data["you"]["head"]["y"] == 0):
-        #     move = "left"
 
         print(f"MOVE: {move}")
         return {"move": move}
