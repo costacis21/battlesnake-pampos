@@ -1,6 +1,6 @@
 import os
 import random
-import pprint
+from pprint import pprint
 
 import cherrypy
 
@@ -36,6 +36,8 @@ class Battlesnake(object):
         # cherrypy.request.json contains information about the game that's about to be played.
         data = cherrypy.request.json
 
+        print(self.obstacles())
+        pprint(data)
         print("START")
         return "ok"
 
@@ -92,7 +94,35 @@ class Battlesnake(object):
         if head[1] - 1 >= 0:
           obstacles.append((head[0], head[1]-1))
 
-      obstacles = list(set(obstacles)) # remove duplicates
+      obstacles = set(obstacles) # remove duplicates
+
+      your_head = dict_to_list(data['you']['head'])
+      your_body_list = data['you']['body']
+      your_body_coordinates = list()
+      your_next_coordinates = list()
+
+      for elt in your_body_list:
+        your_body_coordinates.append(dict_to_list(elt))
+
+      if your_head[0] + 1 <= width:
+          your_next_coordinates.append((your_head[0]+1, your_head[1]))
+
+      if your_head[0] - 1 >= 0:
+        your_next_coordinates.append((your_head[0]-1, your_head[1]))
+
+      if your_head[1] + 1 <= height:
+        your_next_coordinates.append((your_head[0], your_head[1]+1))
+
+      if your_head[1] - 1 >= 0:
+        your_next_coordinates.append((your_head[0], your_head[1]-1))
+
+      #remove your head's next available moves if that's its body
+      your_next_possible_coordinates = set()
+      for elt in your_next_coordinates:
+        if elt not in your_body_coordinates:
+          your_next_possible_coordinates.add(elt)
+
+      obstacles = obstacles - your_next_possible_coordinates
       return obstacles
 
         
@@ -155,7 +185,6 @@ class Battlesnake(object):
         # Choose a random direction to move in
         possible_moves = ["up", "down", "left", "right"]
         move = "left"
-        self.get_snake_obstacles()
 
         if (data["you"]["head"]["x"] == 0):
           move = "up"
@@ -171,9 +200,7 @@ class Battlesnake(object):
         if(data["you"]["head"]["y"] == 0):
           move = "left"
 
-
-
-        print(f"MOVE: {move}")
+        #print(f"MOVE: {move}")
         return {"move": move}
 
     @cherrypy.expose
@@ -195,4 +222,3 @@ if __name__ == "__main__":
     )
     print("Starting Battlesnake Server...")
     cherrypy.quickstart(server)
- 
