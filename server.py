@@ -95,50 +95,51 @@ class Battlesnake(object):
         for part in snake['body']:
           if dict_to_list(part) not in obstacles:
             obstacles.append(dict_to_list(part))
-        head = dict_to_list(snake['head'])
+        if not (snake["id"]==data["you"]["id"]):
+          head = dict_to_list(snake['head'])
 
-        if head[0] + 1 <= width:
-          obstacles.append((head[0]+1, head[1]))
+          if head[0] + 1 < width:
+            obstacles.append((head[0]+1, head[1]))
 
-        if head[0] - 1 >= 0:
-          obstacles.append((head[0]-1, head[1]))
+          if head[0] - 1 >= 0:
+            obstacles.append((head[0]-1, head[1]))
 
-        if head[1] + 1 <= height:
-          obstacles.append((head[0], head[1]+1))
+          if head[1] + 1 < height:
+            obstacles.append((head[0], head[1]+1))
 
-        if head[1] - 1 >= 0:
-          obstacles.append((head[0], head[1]-1))
+          if head[1] - 1 >= 0:
+            obstacles.append((head[0], head[1]-1))
 
       obstacles = set(obstacles) # remove duplicates
 
-      your_head = dict_to_list(data['you']['head'])
-      your_body_list = data['you']['body']
-      your_body_coordinates = list()
-      your_next_coordinates = list()
+      # your_head = dict_to_list(data['you']['head'])
+      # your_body_list = data['you']['body']
+      # your_body_coordinates = list()
+      # your_next_coordinates = list()
 
-      for elt in your_body_list:
-        your_body_coordinates.append(dict_to_list(elt))
+      # for elt in your_body_list:
+      #   your_body_coordinates.append(dict_to_list(elt))
 
-      if your_head[0] + 1 <= width:
-          your_next_coordinates.append((your_head[0]+1, your_head[1]))
+      # if your_head[0] + 1 < width:
+      #     your_next_coordinates.append((your_head[0]+1, your_head[1]))
 
-      if your_head[0] - 1 >= 0:
-        your_next_coordinates.append((your_head[0]-1, your_head[1]))
+      # if your_head[0] - 1 >= 0:
+      #   your_next_coordinates.append((your_head[0]-1, your_head[1]))
 
-      if your_head[1] + 1 <= height:
-        your_next_coordinates.append((your_head[0], your_head[1]+1))
+      # if your_head[1] + 1 < height:
+      #   your_next_coordinates.append((your_head[0], your_head[1]+1))
 
-      if your_head[1] - 1 >= 0:
-        your_next_coordinates.append((your_head[0], your_head[1]-1))
+      # if your_head[1] - 1 >= 0:
+      #   your_next_coordinates.append((your_head[0], your_head[1]-1))
 
       #remove your head's next available moves if that's its body
-      your_next_possible_coordinates = set()
-      for elt in your_next_coordinates:
-        if elt not in your_body_coordinates:
-          your_next_possible_coordinates.add(elt)
+      # your_next_possible_coordinates = set()
+      # for elt in your_next_coordinates:
+      #   if elt not in your_body_coordinates:
+      #     your_next_possible_coordinates.add(elt)
 
-      obstacles = obstacles - your_next_possible_coordinates
-      obstacles = obstacles - set(your_head)
+      # obstacles = obstacles - your_next_possible_coordinates
+      # obstacles = obstacles - set(your_head)
       return obstacles
 
 
@@ -185,6 +186,8 @@ class Battlesnake(object):
         print(data['turn'])
         print(grid)
 
+        # if data["you"]["health"] <20:
+        
         #lets choose a move
         finder = AStarFinder(heuristic=manhattan)
         grid = Grid(matrix = grid)
@@ -199,6 +202,21 @@ class Battlesnake(object):
 
         #now we need to decide what move will take the snake to the next coordinate
         move = choose_move(head, next_coordinate)
+        # else:
+        #   # move = "left"
+        #   if (data["you"]["head"]["x"] == 0):
+        #     move = "up"
+        #     if (data["you"]["head"]["y"]==0):
+        #       return {"move": move}
+
+        #   if(data["you"]["head"]["y"] == data["board"]["height"]-1):
+        #     move = "right"
+
+        #   if(data["you"]["head"]["x"] == data["board"]["width"]-1):
+        #     move = "down"
+
+        #   if(data["you"]["head"]["y"] == 0):
+        #     move = "left"
 
         print(f"MOVE: {move}")
         return {"move": move}
