@@ -13,6 +13,22 @@ This is a simple Battlesnake server written in Python.
 For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python/README.md
 """
 
+# given current position and next, find which move will lead us there
+def choose_move(curr, next):
+  if next[0] != curr[0]:
+    x_diff = next[0] - curr[0]
+    if x_diff == 1:
+      return "right"
+    else:
+      return "left" 
+  else:
+    y_diff = next[1] - curr[1]
+    if y_diff == 1:
+      return "up"
+    else:
+      return "down"
+  
+
 
 def dict_to_list(dict):
       # example: dict = {'x' : 3, 'y' : 5}
@@ -192,28 +208,28 @@ class Battlesnake(object):
         next_coordinate = path[1]
 
         #now we need to decide what move will take the snake to the next coordinate
-
+        move = choose_move(head, next_coordinate)
         #pprint(data)
 
         # Choose a random direction to move in
-        possible_moves = ["up", "down", "left", "right"]
-        move = "left"
+        # possible_moves = ["up", "down", "left", "right"]
+        # move = "left"
 
-        if (data["you"]["head"]["x"] == 0):
-          move = "up"
-          if (data["you"]["head"]["y"]==0):
-            return {"move": move}
+        # if (data["you"]["head"]["x"] == 0):
+        #   move = "up"
+        #   if (data["you"]["head"]["y"]==0):
+        #     return {"move": move}
 
-        if(data["you"]["head"]["y"] == data["board"]["height"]-1):
-          move = "right"
+        # if(data["you"]["head"]["y"] == data["board"]["height"]-1):
+        #   move = "right"
 
-        if(data["you"]["head"]["x"] == data["board"]["width"]-1):
-          move = "down"
+        # if(data["you"]["head"]["x"] == data["board"]["width"]-1):
+        #   move = "down"
         
-        if(data["you"]["head"]["y"] == 0):
-          move = "left"
+        # if(data["you"]["head"]["y"] == 0):
+        #   move = "left"
 
-        #print(f"MOVE: {move}")
+        print(f"MOVE: {move}")
         return {"move": move}
 
     @cherrypy.expose
