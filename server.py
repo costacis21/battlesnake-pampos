@@ -1,6 +1,10 @@
 import os
 import random
 from pprint import pprint
+from pathfinding.finder.a_star import AStarFinder
+from pathfinding.core.heuristic import manhattan, octile
+from pathfinding.core.grid import Grid
+import numpy as np
 
 import cherrypy
 
@@ -36,7 +40,23 @@ class Battlesnake(object):
         # cherrypy.request.json contains information about the game that's about to be played.
         data = cherrypy.request.json
 
-        print(self.obstacles())
+        # width = data['board']['width']
+        # height = data['board']['height']
+
+        # grid = np.ones((height,width), dtype=np.int8)
+
+        # obstacles = self.obstacles()
+        # print(obstacles)
+
+        # food = self.get_closest_food()
+        # print(food)
+
+        # for elt in obstacles:
+        #   #(height-1)-
+        #   grid[(height-1)-elt[1], elt[0]] = 0
+
+        # print(grid)
+
         pprint(data)
         print("START")
         return "ok"
@@ -55,7 +75,7 @@ class Battlesnake(object):
         youY = data["you"]["head"]["y"]
         foodY = food['y']
 
-        curD = ( ( ( ( foodX - youX)**2 ) + ( (foodY - youY)**2) ) ** (1/2) )
+        curD = ( ( ( ( foodX - youX)**2 ) + ( (foodY - youY)**2) ) ** (1/2) ) # 0.5 ????
         d.append((int(curD)))
 
       minIndex = d.index(min(d))
@@ -125,53 +145,6 @@ class Battlesnake(object):
       obstacles = obstacles - your_next_possible_coordinates
       return obstacles
 
-        
-
-
-#     @cherrypy.expose
-#     @cherrypy.tools.json_in()
-#     def get_snake_obstacles(self):
-#       data = cherrypy.request.json
-
-#       obstacles = []
-
-#       for snake in data["board"]["snakes"]:
-#         for part in snake["body"]:
-#           obstacles.append(part)
-#         head_x = snake["head"]["x"]
-#         head_y = snake["head"]["y"]
-#         obstacles.append({"x": head_x+1, "y": head_y})
-#         if(head_y-1>0):
-#           obstacles.append({"x": head_x, "y": head_y-1})
-#         if(head_x-1>0):
-#           obstacles.append({"x": head_x-1, "y": head_y})
-#         obstacles.append({"x": head_x, "y": head_y+1})
-
-# # remove possible duplicates
-#       seen = set()
-#       new_l = []
-#       for d in obstacles:
-#         t = tuple(d.items())
-#         if t not in seen:
-#           seen.add(t)
-#           new_l.append(d)
-#         else:
-#           print("DUPLICATE MALAKA")
-#           print(t)
-#       obstacles = new_l.copy()
-
-#       print(obstacles)
-
-#       """
-#       example, list of dicts
-
-#       [{'x': 1, 'y': 10}, {'x': 1, 'y': 9}, {'x': 1, 'y': 9}, ...]
-
-#       """
-
-
-        
-
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -181,6 +154,46 @@ class Battlesnake(object):
         # Valid moves are "up", "down", "left", or "right".
         # TODO: Use the information in cherrypy.request.json to decide your next move.
         data = cherrypy.request.json
+        width = data['board']['width']
+        height = data['board']['height']
+
+        grid = np.ones((height,width), dtype=np.int8)
+
+        obstacles = self.obstacles()
+        print(obstacles)
+
+        food = self.get_closest_food()
+        print("food")
+        head_x = data['you']['head']['x']
+        head_y = data['you']['head']['y']
+        head = (head_x, head_y)
+        food = dict_to_list(food)
+
+        for elt in obstacles:
+          #(height-1)-
+          # mark where are the obstacles
+          grid[(height-1)-elt[1], elt[0]] = 0
+
+        # mark where is the food
+        grid[(height-1)-food[1], food[0]] = 2
+
+        #mark where is the head
+        grid[(height-1)-head[1], head[0]] = 5
+
+        print(data['turn'])
+        print(grid)
+
+        #lets choose a move
+        finder = AStarFinder(heuristic=manhattan)
+        grid = Grid(matrix = grid)
+        start = grid.node(head[0], head[1])
+        end = grid.node(food[0], food[1])
+        path, runs = finder.find_path(start, end, grid)
+        next_coordinate = path[1]
+
+        #now we need to decide what move will take the snake to the next coordinate
+
+        #pprint(data)
 
         # Choose a random direction to move in
         possible_moves = ["up", "down", "left", "right"]
