@@ -116,6 +116,37 @@ class Battlesnake(object):
 
       obstacles = set(obstacles) # remove duplicates
 
+<<<<<<< HEAD
+=======
+      # your_head = dict_to_list(data['you']['head'])
+      # your_body_list = data['you']['body']
+      # your_body_coordinates = list()
+      # your_next_coordinates = list()
+
+      # for elt in your_body_list:
+      #   your_body_coordinates.append(dict_to_list(elt))
+
+      # if your_head[0] + 1 < width:
+      #     your_next_coordinates.append((your_head[0]+1, your_head[1]))
+
+      # if your_head[0] - 1 >= 0:
+      #   your_next_coordinates.append((your_head[0]-1, your_head[1]))
+
+      # if your_head[1] + 1 < height:
+      #   your_next_coordinates.append((your_head[0], your_head[1]+1))
+
+      # if your_head[1] - 1 >= 0:
+      #   your_next_coordinates.append((your_head[0], your_head[1]-1))
+
+      #remove your head's next available moves if that's its body
+      # your_next_possible_coordinates = set()
+      # for elt in your_next_coordinates:
+      #   if elt not in your_body_coordinates:
+      #     your_next_possible_coordinates.add(elt)
+
+      # obstacles = obstacles - your_next_possible_coordinates
+      # obstacles = obstacles - set(your_head)
+>>>>>>> 849197f09fc43179cbb588c347b17504b19d830d
       return obstacles
 
 
@@ -182,6 +213,21 @@ class Battlesnake(object):
 
         #now we need to decide what move will take the snake to the next coordinate
         move = choose_move(head, next_coordinate)
+        # else:
+        #   # move = "left"
+        #   if (data["you"]["head"]["x"] == 0):
+        #     move = "up"
+        #     if (data["you"]["head"]["y"]==0):
+        #       return {"move": move}
+
+        #   if(data["you"]["head"]["y"] == data["board"]["height"]-1):
+        #     move = "right"
+
+        #   if(data["you"]["head"]["x"] == data["board"]["width"]-1):
+        #     move = "down"
+
+        #   if(data["you"]["head"]["y"] == 0):
+        #     move = "left"
 
         print(f"MOVE: {move}")
         return {"move": move}
