@@ -149,30 +149,54 @@ class Battlesnake(object):
         grid = Grid(matrix = grid)
         start = grid.node(head[0], head[1])
 
-        if health < 60:
-          food = self.get_closest_food(data)
-          food = dict_to_list(food)
-        else:
-          while 1:
-            food = random_point(width,height)
-            if food not in obstacles and food not in all_food:
-              #good to go
-              end = grid.node(food[0], food[1])
-              path, runs = finder.find_path(start, end, grid)
-              if path:
-                next_coordinate = path[1]
-                move = choose_move(head, next_coordinate)
-                print(f"MOVE: {move}")
-                return {"move": move}
-              else:
-                continue
+        food = self.get_closest_food(data)
+        food = dict_to_list(food)
 
-        end = grid.node(food[0], food[1])
-        path, runs = finder.find_path(start, end, grid)
-        next_coordinate = path[1]
-        move = choose_move(head, next_coordinate)
-        print(f"MOVE: {move}")
-        return {"move": move}
+        while True:
+          #execute until we return
+          end = grid.node(food[0], food[1])
+          path, runs = finder.find_path(start, end, grid)
+          if not path:
+            food = random_point(width,height)
+            continue
+          else:
+            next_coordinate = path[1]
+            move = choose_move(head, next_coordinate)
+            print(f"MOVE: {move}")
+            return {"move": move}
+
+
+        # if health < 85:
+        #   food = self.get_closest_food(data)
+        #   food = dict_to_list(food)
+        # else:
+        #   while 1:
+        #     food = random_point(width,height)
+        #     if food not in obstacles and food not in all_food:
+        #       #good to go
+        #       end = grid.node(food[0], food[1])
+        #       path, runs = finder.find_path(start, end, grid)
+        #       if path:
+        #         next_coordinate = path[1]
+        #         move = choose_move(head, next_coordinate)
+        #         print(f"MOVE: {move}")
+        #         return {"move": move}
+        #       else:
+        #         continue
+
+        # while 1:
+        #   end = grid.node(food[0], food[1])
+        #   path, runs = finder.find_path(start, end, grid)
+        #   if not path:
+        #     food = random_point(width,height)
+        #     continue
+        #   else:
+        #     break
+
+        # next_coordinate = path[1]
+        # move = choose_move(head, next_coordinate)
+        # print(f"MOVE: {move}")
+        # return {"move": move}
 
         
 
