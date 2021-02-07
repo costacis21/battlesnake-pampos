@@ -156,16 +156,16 @@ class Battlesnake(object):
           #execute until we return
           end = grid.node(food[0], food[1])
           path, runs = finder.find_path(start, end, grid)
-          if not path[1]:
-            # if there's no path to the closest one
-            # redirect to a random food with a path
-            food = random.choice(all_food)
-            continue
-          else:
+          try:
             next_coordinate = path[1]
             move = choose_move(head, next_coordinate)
             print(f"MOVE: {move}")
             return {"move": move}
+            # if there's no path to the closest one
+            # redirect to a random food with a path  
+          except:
+            food = random.choice(all_food)
+            continue
 
 
         # if health < 85:
