@@ -144,7 +144,7 @@ class Battlesnake(object):
           # mark where are the obstacles
           if list(elt) != list(head):
             grid[elt[1], elt[0]] = 0
-
+        print(grid)
         finder = AStarFinder(heuristic=manhattan)
         grid = Grid(matrix = grid)
         start = grid.node(head[0], head[1])
@@ -156,8 +156,10 @@ class Battlesnake(object):
           #execute until we return
           end = grid.node(food[0], food[1])
           path, runs = finder.find_path(start, end, grid)
-          if not path:
-            food = random_point(width,height)
+          if not path[1]:
+            # if there's no path to the closest one
+            # redirect to a random food with a path
+            food = random.choice(all_food)
             continue
           else:
             next_coordinate = path[1]
